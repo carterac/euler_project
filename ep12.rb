@@ -1,4 +1,4 @@
-#What is the first triangle number to have over 500 divisors?
+# What is the first triangle number to have over 500 divisors?
 
 # Return the nth triangle number
 def triangle(n)
