@@ -1,11 +1,13 @@
 #What is the first triangle number to have over 500 divisors?
 
+# Return the nth triangle number
 def triangle(n)
   return (n.to_f**2)/2 + n.to_f/2
 end
 
 
-#returns number of divisors in n based on its prime factors
+# Returns number of divisors in n based on its prime factors
+# Returns divisors very fast (I'm guessing around O(log(log(n))) time) once you've calculated prime factors
 def num_divisors(n)
 
   prime_factors = calculate_prime_factors(n)
@@ -14,10 +16,13 @@ def num_divisors(n)
     return 2
   end
   
-  #The number of divisors is equivalent to the number of ways you can separate
-  #n's prime factors into two non-null distinct sets
-  #except you have to subtract 2 since you can't have a null set
-  #but then you have to add 2 to account for the divisors n and 1
+  # Key insight: The number of divisors is equivalent to the number of ways you can separate
+  # n's prime factors into two non-null distinct sets
+  # Number of distinct sets double for every new prime factor. If there are 2 of the same prime factor
+  # the number of distinct sets increases by 3, and then 4 for 3 of the same prime factor etc..
+  # 
+  # For example, 60 prime factors are 2, 2, 3, and 5. 
+  # So number of distinct sets = 3 (two 2's) x 2 (one 3) x 2 (one 5) = 12
   i = 0
   num_divisors = 1
   while i <= prime_factors.size-1
@@ -34,7 +39,10 @@ def num_divisors(n)
   
 end
   
-#returns an array of all the prime factors of n
+# Returns an array of all the prime factors of n
+# Keeps global array primes[] updated to avoid calculating primes twice
+# Pretty fast. Only check up to the sqrt(n) max and only checks primes
+# If primes are pre-generated (only needs to happen once) worst case time is O(sqrt(n) / log(sqrt(n))
 def calculate_prime_factors(n)
   
   square_root_of_n = n**0.5
@@ -44,43 +52,43 @@ def calculate_prime_factors(n)
     $primes<<2
   end
   
-  #divide n by all primes in primes[]
+  # Divide n by all primes in primes[]
   for prime in $primes
 
-    #but don't waste time going past the sqrt(n)
+    # But don't waste time going past the sqrt(n)
     if prime > square_root_of_n
       break
     end
     
-    #if a prime divides n, add it to prime_factors
+    # If a prime divides n, add it to prime_factors
     if n % prime == 0
       
       multiple_prime_count = 2
       prime_factors<<prime
       
-      #divide n by the prime factor
-      #this is OK because the only prime factors left in n will be bigger than prime
+      # Divide n by the prime factor
+      # This is OK because the only prime factors left in n will be bigger than prime
       n = n/prime
       
-      #keep dividing for multiple of the same prime factor
+      # Keep dividing for multiple of the same prime factor
       while n % prime == 0
         n = n/prime
         prime_factors<<prime
       end
       
-      #update the new square root of n that we care about for checking prime factors
+      # Update the new square root of n that we care about for checking prime factors
       square_root_of_n = n**0.5
   
     end
     
-    #if the last prime in primes is less than sqrt(n) add the next prime to primes
+    # If the last prime in primes is less than sqrt(n) add the next prime to primes
     if prime == $primes.last && prime < square_root_of_n
       $primes<<get_next_prime(prime)
     end
 
   end
   
-  #whatever is left must be a prime factor if it's greater than 1
+  # Whatever is left must be a prime factor if it's greater than 1
   if n > 1
     prime_factors<<n
   end
@@ -89,7 +97,7 @@ def calculate_prime_factors(n)
 end
 
   
-#returns the next prime after n. Uses primes array to help. 
+# Returns the next prime after n. Uses primes array to help. 
 def get_next_prime(n)
   
   #make sure primes[] has all primes up to sqrt(n)
@@ -99,12 +107,12 @@ def get_next_prime(n)
     $primes = prime_numbers_up_to(n**0.5)
   end
   
-  #make sure to start in the positives
+  # Make sure to start in the positives
   if n < 1
     n = 1
   end
   
-  #keeping checking consecutive numbers until a prime is found
+  # Check consecutive numbers i until a prime is found
   i = n
   is_prime = false
   while is_prime == false
@@ -115,12 +123,12 @@ def get_next_prime(n)
     
     for prime in $primes
       
-      #no need going past the sqrt
+      # No need going past the sqrt
       if prime > sqrt_i
         break
       end
       
-      #break once you've found a divisor
+      # Break once you've found a divisor
       if i % prime == 0 
         is_prime = false
         break
@@ -133,24 +141,19 @@ def get_next_prime(n)
   
 end
 
-array = [2,3,5,7,11,13,17,19,23,29]
-empty_array = []
 $primes = []
 
+# Print out the first number with over 500 divisors
+# Opportunity for further speed improvement by using a binary search function for i
 i = 1
 num = 0
-while num < 1000
+while num < 500
   triangle = triangle(i)
   num = num_divisors(triangle)
   puts triangle.to_s + " has " + num.to_s + " divisors"
   i = i + 1
 end
 
-#puts prime_numbers_up_to(50, empty_array)
-      
-#puts prime_factors(60, empty_array)
-
-#puts get_next_prime(17, empty_array)
 
 #returns array of primes up to n building upon an existing array of primes if possible
 #this assumes primes contains only primes, in ascending order, with none missing
